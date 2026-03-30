@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>JENNA-MAN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:#000;display:flex;flex-direction:column;align-items:center;font-family:"Courier New",Courier,monospace;overflow:hidden;touch-action:none;}
@@ -25,9 +27,111 @@
   #mode-row{display:flex;align-items:center;gap:10px;margin-top:4px;}
   #mode-label{color:#FFE000;font-size:9px;font-family:"Courier New",monospace;}
   #dpad-wrap{display:none;}
+
+  /* ── Splash Overlay ─────────────────────────────── */
+  #splash-overlay{display:none;position:fixed;inset:0;background:#000a00;color:#00ff41;font-family:'Share Tech Mono','Courier New',monospace;overflow-y:auto;z-index:999;}
+  #splash-overlay::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,65,.03) 0px,rgba(0,255,65,.03) 1px,transparent 1px,transparent 3px);pointer-events:none;z-index:1;}
+  #splash-overlay::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.8) 100%);pointer-events:none;z-index:1;}
+  .so-inner{max-width:900px;margin:0 auto;padding:30px 20px;position:relative;z-index:2;}
+  .so-sys{font-family:'Press Start 2P',monospace;font-size:9px;color:rgba(0,255,65,.3);letter-spacing:4px;text-align:center;margin-bottom:14px;animation:so-flicker 8s infinite;}
+  .so-title{font-family:'Press Start 2P',monospace;font-size:clamp(14px,3vw,26px);color:#00ff41;text-shadow:0 0 10px #00ff41,0 0 30px #00ff41;text-align:center;animation:so-glow 3s ease-in-out infinite;margin-bottom:10px;}
+  .so-date{font-family:'VT323',monospace;font-size:22px;color:#ffe600;text-align:center;margin-bottom:22px;}
+  .so-stats{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;padding:16px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.03);margin-bottom:26px;}
+  .so-stat-n{font-family:'Press Start 2P',monospace;font-size:24px;text-shadow:0 0 10px currentColor;display:block;text-align:center;}
+  .so-stat-l{font-size:10px;color:rgba(0,255,65,.5);letter-spacing:2px;text-align:center;display:block;margin-top:4px;}
+  .so-hdr{font-family:'Press Start 2P',monospace;font-size:9px;color:#00cfff;text-shadow:0 0 8px #00cfff;letter-spacing:3px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(0,207,255,.3);}
+  .so-hdr::before{content:'>> ';color:#00ff41;}
+  .so-xp{margin-bottom:12px;}
+  .so-xp-lbl{font-size:11px;color:rgba(0,255,65,.6);letter-spacing:2px;margin-bottom:5px;display:flex;justify-content:space-between;}
+  .so-xp-track{height:15px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.2);overflow:hidden;}
+  .so-xp-fill{height:100%;background:linear-gradient(90deg,#003b00,#00ff41);box-shadow:0 0 8px #00ff41;width:0;transition:width 1.8s cubic-bezier(.1,.7,.3,1);}
+  .so-xp-fill.gold{background:linear-gradient(90deg,#3b3000,#ffe600);box-shadow:0 0 8px #ffe600;}
+  .so-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:32px;}
+  .so-ach{border:1px solid rgba(0,255,65,.22);padding:12px 14px;background:rgba(0,255,65,.02);transition:all .2s;opacity:0;animation:so-reveal .4s ease forwards;}
+  .so-ach:hover{border-color:#00ff41;background:rgba(0,255,65,.07);transform:translateX(3px);box-shadow:-3px 0 0 #00ff41;}
+  .so-ach.legend{border-color:rgba(255,230,0,.5);background:rgba(255,230,0,.04);}
+  .so-icon{font-size:17px;margin-bottom:5px;display:block;}
+  .so-ach-title{font-family:'VT323',monospace;font-size:17px;color:#00ff41;line-height:1.3;margin-bottom:3px;}
+  .so-ach.legend .so-ach-title{color:#ffe600;}
+  .so-badge{font-size:9px;letter-spacing:2px;padding:1px 5px;display:inline-block;margin-top:2px;}
+  .so-badge.k{color:#00cfff;border:1px solid rgba(0,207,255,.4);background:rgba(0,207,255,.05);}
+  .so-badge.w{color:#ffe600;border:1px solid rgba(255,230,0,.4);background:rgba(255,230,0,.05);}
+  .so-badge.lg{color:#ffe600;border:1px solid rgba(255,230,0,.6);}
+  .so-dt{font-size:10px;color:rgba(0,255,65,.3);float:right;}
+  .so-boss{border:2px solid #ffe600;padding:24px;text-align:center;background:rgba(255,230,0,.03);margin-bottom:32px;}
+  .so-boss-lbl{font-family:'Press Start 2P',monospace;font-size:8px;color:#ff003c;text-shadow:0 0 8px #ff003c;letter-spacing:4px;margin-bottom:14px;animation:so-blink 1s step-end infinite;}
+  .so-boss-txt{font-family:'VT323',monospace;font-size:23px;color:#ffe600;line-height:1.7;}
+  .so-boss-big{font-size:30px;display:block;margin:8px 0;text-shadow:0 0 12px #ffe600;}
+  .so-launch-btn{display:block;margin:0 auto 20px;font-family:'Press Start 2P',monospace;font-size:11px;background:#111;border:2px solid #ffe600;color:#ffe600;padding:14px 28px;cursor:pointer;letter-spacing:2px;transition:all .2s;}
+  .so-launch-btn:hover{background:#ffe600;color:#000;}
+  .so-footer{text-align:center;font-size:10px;color:rgba(0,255,65,.3);letter-spacing:3px;padding-top:16px;border-top:1px solid rgba(0,255,65,.1);}
+  .so-ach:nth-child(1){animation-delay:.05s}.so-ach:nth-child(2){animation-delay:.1s}.so-ach:nth-child(3){animation-delay:.15s}.so-ach:nth-child(4){animation-delay:.2s}.so-ach:nth-child(5){animation-delay:.25s}.so-ach:nth-child(6){animation-delay:.3s}.so-ach:nth-child(7){animation-delay:.35s}.so-ach:nth-child(8){animation-delay:.4s}.so-ach:nth-child(9){animation-delay:.45s}.so-ach:nth-child(10){animation-delay:.5s}.so-ach:nth-child(11){animation-delay:.55s}.so-ach:nth-child(12){animation-delay:.6s}.so-ach:nth-child(13){animation-delay:.65s}.so-ach:nth-child(14){animation-delay:.7s}.so-ach:nth-child(15){animation-delay:.75s}.so-ach:nth-child(16){animation-delay:.8s}.so-ach:nth-child(17){animation-delay:.85s}.so-ach:nth-child(18){animation-delay:.9s}.so-ach:nth-child(19){animation-delay:.95s}.so-ach:nth-child(20){animation-delay:1s}.so-ach:nth-child(21){animation-delay:1.05s}.so-ach:nth-child(22){animation-delay:1.1s}.so-ach:nth-child(23){animation-delay:1.15s}.so-ach:nth-child(24){animation-delay:1.2s}.so-ach:nth-child(25){animation-delay:1.25s}.so-ach:nth-child(26){animation-delay:1.3s}
+  @keyframes so-flicker{0%,96%,100%{opacity:1}97%{opacity:.4}98%{opacity:1}99%{opacity:.6}}
+  @keyframes so-glow{0%,100%{text-shadow:0 0 10px #00ff41,0 0 30px #00ff41}50%{text-shadow:0 0 20px #00ff41,0 0 50px #00ff41,0 0 80px rgba(0,255,65,.5)}}
+  @keyframes so-blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes so-reveal{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<div id="splash-overlay">
+  <div class="so-inner">
+    <div class="so-sys">SYSTEM BOOT COMPLETE — PLAYER PROFILE LOADED</div>
+    <div class="so-title">JENNA.EXE — ACHIEVEMENT LOG</div>
+    <div class="so-date">MAR 11 — MAR 19, 2026</div>
+    <div class="so-stats">
+      <div><span class="so-stat-n" style="color:#ffe600">26</span><span class="so-stat-l">TOTAL WINS</span></div>
+      <div><span class="so-stat-n" style="color:#00cfff">9</span><span class="so-stat-l">KNOWLEDGE XP</span></div>
+      <div><span class="so-stat-n" style="color:#ffe600">17</span><span class="so-stat-l">TANGIBLE WINS</span></div>
+      <div><span class="so-stat-n" style="color:#ff003c">9</span><span class="so-stat-l">DAYS PLAYED</span></div>
+    </div>
+    <div class="so-hdr">SKILL PROGRESSION</div>
+    <div style="margin-bottom:28px">
+      <div class="so-xp"><div class="so-xp-lbl"><span>TERMINAL CONFIDENCE</span><span>★★★★☆</span></div><div class="so-xp-track"><div class="so-xp-fill" data-w="80"></div></div></div>
+      <div class="so-xp"><div class="so-xp-lbl"><span>GIT OPERATIONS</span><span>★★★☆☆</span></div><div class="so-xp-track"><div class="so-xp-fill" data-w="65"></div></div></div>
+      <div class="so-xp"><div class="so-xp-lbl"><span>DEBUGGING UNKNOWN ERRORS</span><span>★★★★☆</span></div><div class="so-xp-track"><div class="so-xp-fill" data-w="78"></div></div></div>
+      <div class="so-xp"><div class="so-xp-lbl"><span>KNOWING WHEN TO QUESTION JOE</span><span>★★★★★</span></div><div class="so-xp-track"><div class="so-xp-fill gold" data-w="100"></div></div></div>
+    </div>
+    <div class="so-hdr">ACHIEVEMENTS UNLOCKED (26/26)</div>
+    <div class="so-grid">
+      <div class="so-ach"><span class="so-icon">⚙️</span><div class="so-ach-title">Configured git for the first time</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">📦</span><div class="so-ach-title">Installed Node.js and npm on Windows</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">🖥️</span><div class="so-ach-title">Understands PowerShell equivalents for bash</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">🔑</span><div class="so-ach-title">Understands what a token is and why it expires</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">🤖</span><div class="so-ach-title">Installed Claude Code CLI</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">📚</span><div class="so-ach-title">Book creation working end-to-end</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">🗺️</span><div class="so-ach-title">Google Drive integration wired up</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 11</span></div>
+      <div class="so-ach"><span class="so-icon">🔌</span><div class="so-ach-title">Set up Linear-GitHub integration</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🩺</span><div class="so-ach-title">Diagnosed broken .mcp.json — /sse deprecated</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">📡</span><div class="so-ach-title">Understood SSE deprecation — HTTP is now standard</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🤔</span><div class="so-ach-title">Learned: Claude Code agent ≠ PowerShell</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">📋</span><div class="so-ach-title">Understood Linear free tier limits</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🧠</span><div class="so-ach-title">Used Plan Mode deliberately</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🔍</span><div class="so-ach-title">Completed retroactive pattern capture audit</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🏗️</span><div class="so-ach-title">Updated Protocol — coaching before admin</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🎨</span><div class="so-ach-title">Designed structured template for Learning Context</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">✅</span><div class="so-ach-title">All 6 Learning Context patterns structured</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🚩</span><div class="so-ach-title">Identified coaching function gap in Protocol</div><span class="so-badge k">KNOWLEDGE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">📁</span><div class="so-ach-title">Claude How-To-Guide moved to Artifact Library</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🧹</span><div class="so-ach-title">Backlog cleaned — duplicates removed</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🗂️</span><div class="so-ach-title">Learning Backlog triaged and organized</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">⭐</span><div class="so-ach-title">Priority field added to Learning Backlog</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🔧</span><div class="so-ach-title">Admin/Build items prioritized with context</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">🏁</span><div class="so-ach-title">P1 Admin/Build items completed</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach"><span class="so-icon">⚡</span><div class="so-ach-title">EXTRACT-TIPS workflow created</div><span class="so-badge w">TANGIBLE</span><span class="so-dt">MAR 19</span></div>
+      <div class="so-ach legend"><span class="so-icon">👑</span><div class="so-ach-title">Always checks the diff before merging</div><span class="so-badge lg">LEGENDARY</span><span class="so-dt">MAR 19</span></div>
+    </div>
+    <div class="so-boss">
+      <div class="so-boss-lbl">⚠ CURRENT STATUS ⚠</div>
+      <div class="so-boss-txt">
+        Started as a VP who said "what's npm".<br>
+        <span class="so-boss-big">Now diagnosing deprecated<br>MCP transport protocols.</span>
+        Came for the app. Stayed for the <span style="color:#ff003c">rabbit hole</span>.
+      </div>
+    </div>
+    <button class="so-launch-btn" onclick="hideSplashAndStart()">► LAUNCH GAME</button>
+    <div class="so-footer">JENNA.EXE v1.0.0 — VP → ENGINEER — MARCH 2026</div>
+  </div>
+</div>
 <canvas id="c"></canvas>
 <div id="ui">
   <div class="hud">
@@ -416,13 +520,28 @@ function drawOver(){
   ctx.fillStyle='#888';ctx.font='8'+F;ctx.fillText('TAP TO RETRY',canvas.width/2,canvas.height/2+30);
 }
 
+// ── Splash overlay ────────────────────────────────────
+function showSplashOverlay(){
+  const overlay=document.getElementById('splash-overlay');
+  overlay.style.display='block';
+  overlay.scrollTop=0;
+  setTimeout(()=>{
+    overlay.querySelectorAll('.so-xp-fill').forEach(b=>{b.style.width=b.dataset.w+'%';});
+  },300);
+}
+function hideSplashAndStart(){
+  document.getElementById('splash-overlay').style.display='none';
+  phase='game';
+  initGame();
+}
+
 // ── Main loop ─────────────────────────────────────────
 function loop(){
   raf=requestAnimationFrame(loop);
   ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
 
   if(phase==='coin'){drawCoin();return;}
-  if(phase==='splash'){drawSplash();return;}
+  if(phase==='splash'){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);return;}
   if(phase==='win'){drawWinScreen();return;}
   if(phase==='over'){
     // draw frozen maze then overlay
@@ -441,7 +560,8 @@ function loop(){
 function onTap(){
   initAC();
   if(AC&&AC.state==='suspended')AC.resume().then(()=>beep(523,'sine',.1,.2));
-  if(phase==='coin'){phase='splash';splashFrame=0;splashScrollY=0;return;}
+  if(phase==='coin'){phase='splash';showSplashOverlay();return;}
+  if(phase==='splash'){hideSplashAndStart();return;}
   if(phase==='win'||phase==='over'){phase='coin';return;}
 }
 
